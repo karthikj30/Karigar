@@ -1,7 +1,7 @@
 # Environment variables
-.env
-.env.local
-.env.production
+#.env
+#.env.local
+#.env.production
 
 # Python
 __pycache__/
@@ -57,9 +57,9 @@ logs/
 *.temp
 
 # Google Cloud
-serviceAccount.json
-*.json
-!config/serviceAccount.json
+#serviceAccount.json
+#*.json
+#!config/serviceAccount.json
 
 # Node modules (if any)
 node_modules/
