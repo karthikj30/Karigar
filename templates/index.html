@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karigar - AI-Powered Artisan Marketplace</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Modern Social Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient fixed-top" style="background: linear-gradient(90deg, #b993d6 0%, #8ca6db 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <div class="container-fluid px-4">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <a class="navbar-brand fw-bold d-flex align-items-center" href="#home" style="font-family: 'Poppins', sans-serif; font-size: 1.5rem;">
+                        <img src="/static/logo.png" alt="Karigar Logo" style="width:32px;height:32px;border-radius:50%;margin-right:8px;"> Karigar
+                    </a>
+                    <ul class="navbar-nav flex-row ms-3 align-items-center" style="gap:1.5rem;">
+                        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/map">Artisan Map</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#tools">AI Tools</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    </ul>
+                </div>
+                <div class="d-flex align-items-center">
+                    <a class="nav-link d-flex align-items-center" href="/profile" id="profileHeaderLink">
+                        <img src="/static/logo.png" alt="Profile" style="width:28px;height:28px;border-radius:50%;margin-right:6px;"> Profile
+                    </a>
+                    <div class="nav-item dropdown ms-2">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="authDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Account
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="authDropdown">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</a></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#signinModal">Sign In</a></li>
+                        </ul>
+                    </div>
+                    <div class="d-none d-md-block ms-3 position-relative" style="min-width: 240px;">
+                        <input id="navSearch" class="form-control form-control-sm" type="search" placeholder="Search users" autocomplete="off">
+                        <div id="navSearchResults" class="dropdown-menu w-100" style="display:none; max-height: 400px; overflow:auto; padding: 0; border: 1px solid #dee2e6; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section position-relative">
+        <video autoplay muted loop playsinline class="hero-bg-video" id="hero-bg-video">
+            <source src="/static/bg.mp4" type="video/mp4">
+        </video>
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="container position-relative" style="z-index:2;">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-7 d-flex flex-column justify-content-center">
+                    <div class="p-4 mb-4" style="background: rgba(255,255,255,0.18); border-radius: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.12);backdrop-filter: blur(8px);">
+                        <h1 class="display-4 fw-bold mb-3" style="font-family:'Poppins',sans-serif;letter-spacing:-1px;">
+                            Empowering Traditional Artisans with AI
+                        </h1>
+                        <p class="lead mb-4" style="font-size:1.25rem;">
+                            Connect with local artisans, discover their stories, and help them reach new digital audiences through our AI-powered platform.
+                        </p>
+                        <div class="d-flex gap-3">
+                            <button class="btn btn-success btn-lg px-4" onclick="scrollToSection('map')">
+                                <i class="fas fa-map-marker-alt me-2"></i>Explore Artisans
+                            </button>
+                            <button class="btn btn-outline-danger btn-lg px-4" onclick="scrollToSection('tools')">
+                                <i class="fas fa-magic me-2"></i>AI Tools
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-flex justify-content-center align-items-center">
+                    <div class="shadow-lg rounded-4 p-3 bg-dark" style="max-width:320px;">
+                        <img src="/static/logo.png" alt="Karigar Logo" class="img-fluid rounded-4" style="max-width:220px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Artisan Discovery Section -->
+    <section id="discover" class="py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">Discover Artisans Near You</h2>
+                    <p class="lead">Explore traditional crafts and connect with local artisans across India</p>
+                    <a href="/map" class="btn btn-success btn-lg mt-3">
+                        <i class="fas fa-map-marked-alt me-2"></i>
+                        Explore Artisan Map
+                    </a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-store fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Famous Marketplaces</h5>
+                            <p class="card-text">Discover historic marketplaces like Chandni Chowk, Johari Bazaar, and more.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-palette fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Artisan Workshops</h5>
+                            <p class="card-text">Visit traditional craft centers and artisan villages across India.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-map-marker-alt fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">Interactive Map</h5>
+                            <p class="card-text">Use our interactive map to find the best places to buy authentic crafts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Tools Section -->
+    <section id="tools" class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">AI-Powered Tools</h2>
+                    <p class="lead">Leverage artificial intelligence to enhance your craft and reach</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <!-- Story Generation Tool -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="tool-card h-100">
+                        <div class="tool-icon">
+                            <i class="fas fa-pen-fancy"></i>
+                        </div>
+                        <h4>Story Generator</h4>
+                        <p>Create compelling stories about your craft and products using AI</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#storyModal">
+                            Generate Story
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Voice Reading Tool -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="tool-card h-100">
+                        <div class="tool-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <h4>Voice Stories</h4>
+                        <p>Convert your stories into engaging audio content</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#voiceModal">
+                            Create Audio
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Design Enhancement Tool -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="tool-card h-100">
+                        <div class="tool-icon">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                        <h4>Design Ideas</h4>
+                        <p>Get AI-powered suggestions to enhance your designs</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#designModal">
+                            Enhance Design
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Video Creation Tool -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="tool-card h-100">
+                        <div class="tool-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h4>Video Scripts</h4>
+                        <p>Generate scripts for social media and YouTube videos</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#videoModal">
+                            Create Script
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Drawing Analysis Tool -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="tool-card h-100">
+                        <div class="tool-icon">
+                            <i class="fas fa-drafting-compass"></i>
+                        </div>
+                        <h4>Drawing Analysis</h4>
+                        <p>Transform sketches into traditional craft designs</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#drawingModal">
+                            Analyze Drawing
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Image Generation Tool -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="tool-card h-100">
+                        <div class="tool-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <h4>Image Generation</h4>
+                        <p>Generate sample images from text descriptions for inspiration</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#imageModal">
+                            Generate Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="display-5 fw-bold mb-4">About Karigar</h2>
+                    <p class="lead mb-4">
+                        Karigar bridges the gap between traditional Indian craftsmanship and modern digital markets. 
+                        Our AI-powered platform helps artisans tell their stories, reach new audiences, and preserve 
+                        cultural heritage while embracing innovation.
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h3 class="fw-bold text-primary">500+</h3>
+                                <p class="mb-0">Artisans Connected</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h3 class="fw-bold text-primary">50+</h3>
+                                <p class="mb-0">Craft Types</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h3 class="fw-bold text-primary">25+</h3>
+                                <p class="mb-0">States Covered</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h3 class="fw-bold text-primary">1000+</h3>
+                                <p class="mb-0">Stories Generated</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <video class="img-fluid rounded-3 shadow" autoplay muted loop playsinline style="width: 100%; height: 400px; object-fit: cover;">
+                        <source src="{{ url_for('static', filename='Traditional Crafts.mp4') }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-palette me-2"></i>Karigar
+                    </h5>
+                    <p>Empowering traditional artisans with AI technology to preserve and promote Indian craftsmanship.</p>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#home" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="/map" class="text-light text-decoration-none">Artisan Map</a></li>
+                        <li><a href="#tools" class="text-light text-decoration-none">AI Tools</a></li>
+                        <li><a href="#about" class="text-light text-decoration-none">About</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h6 class="fw-bold mb-3">Contact</h6>
+                    <p class="mb-1">
+                        <i class="fas fa-envelope me-2"></i>info@karigar.ai
+                    </p>
+                    <p class="mb-0">
+                        <i class="fas fa-phone me-2"></i>+91 98765 43210
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 Karigar. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">Powered by Google Cloud AI</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Story Generation Modal -->
+    <div class="modal fade" id="storyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generate Artisan Story</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="storyForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Artisan Name</label>
+                                <input type="text" class="form-control" id="artisanName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Craft Type</label>
+                                <select class="form-select" id="craftType" required>
+                                    <option value="">Select Craft</option>
+                                    <option value="Madhubani Painting">Madhubani Painting</option>
+                                    <option value="Bamboo Weaving">Bamboo Weaving</option>
+                                    <option value="Block Printing">Block Printing</option>
+                                    <option value="Pottery">Pottery</option>
+                                    <option value="Textile Weaving">Textile Weaving</option>
+                                    <option value="Wood Carving">Wood Carving</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Location</label>
+                                <input type="text" class="form-control" id="artisanLocation" placeholder="e.g., Jaipur, Rajasthan">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Experience</label>
+                                <input type="text" class="form-control" id="artisanExperience" placeholder="e.g., 15 years, 3rd generation">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Product Description</label>
+                                <textarea class="form-control" id="productDescription" rows="3" 
+                                    placeholder="Describe the product or craft you want to create a story for..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="generateStory()">Generate Story</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Generation Modal -->
+    <div class="modal fade" id="voiceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Voice Story</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="voiceForm">
+                        <div class="mb-3">
+                            <label class="form-label">Enter text to convert to speech</label>
+                            <textarea class="form-control" id="voiceText" rows="5" 
+                                placeholder="Enter your story or description here..."></textarea>
+                        </div>
+                    </form>
+                    <div id="audioPlayer" class="mt-3" style="display: none;">
+                        <h6>Generated Audio:</h6>
+                        <audio controls class="w-100">
+                            <source id="audioSource" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="generateVoice()">Generate Voice</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Design Enhancement Modal -->
+    <div class="modal fade" id="designModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Design Enhancement Ideas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="designForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Craft Type</label>
+                                <select class="form-select" id="designCraftType" required>
+                                    <option value="">Select Craft</option>
+                                    <option value="Madhubani Painting">Madhubani Painting</option>
+                                    <option value="Bamboo Weaving">Bamboo Weaving</option>
+                                    <option value="Block Printing">Block Printing</option>
+                                    <option value="Pottery">Pottery</option>
+                                    <option value="Textile Weaving">Textile Weaving</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Style Preference</label>
+                                <select class="form-select" id="stylePreference">
+                                    <option value="traditional">Traditional</option>
+                                    <option value="modern">Modern</option>
+                                    <option value="fusion">Fusion</option>
+                                    <option value="contemporary">Contemporary</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Current Design Description</label>
+                                <textarea class="form-control" id="currentDesign" rows="3" 
+                                    placeholder="Describe your current design or what you want to enhance..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="designResults" class="mt-4" style="display: none;">
+                        <h6>Enhancement Ideas:</h6>
+                        <div id="designIdeas" class="border p-3 rounded bg-light"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="enhanceDesign()">Get Ideas</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Script Modal -->
+    <div class="modal fade" id="videoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generate Video Script</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="videoForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Artisan Name</label>
+                                <input type="text" class="form-control" id="videoArtisanName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Craft Type</label>
+                                <input type="text" class="form-control" id="videoCraftType" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Product Name</label>
+                                <input type="text" class="form-control" id="videoProductName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Platform</label>
+                                <select class="form-select" id="videoPlatform">
+                                    <option value="youtube">YouTube</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="tiktok">TikTok</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Story/Background</label>
+                                <textarea class="form-control" id="videoStory" rows="3" 
+                                    placeholder="Tell us about the artisan's story or background..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="videoResults" class="mt-4" style="display: none;">
+                        <h6>Video Script:</h6>
+                        <div id="videoScript" class="border p-3 rounded bg-light"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="generateVideoScript()">Generate Script</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawing Analysis Modal -->
+    <div class="modal fade" id="drawingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Analyze Drawing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="drawingForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Craft Type</label>
+                                <select class="form-select" id="drawingCraftType" required>
+                                    <option value="">Select Craft</option>
+                                    <option value="Madhubani Painting">Madhubani Painting</option>
+                                    <option value="Bamboo Weaving">Bamboo Weaving</option>
+                                    <option value="Block Printing">Block Printing</option>
+                                    <option value="Pottery">Pottery</option>
+                                    <option value="Textile Weaving">Textile Weaving</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Upload Drawing/Sketch</label>
+                                <input type="file" class="form-control" id="drawingFile" accept="image/*" onchange="previewImage(this)">
+                                <div class="form-text">Upload an image of your drawing or sketch</div>
+                                <div id="imagePreview" class="mt-2" style="display: none;">
+                                    <img id="previewImg" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                    <p class="text-muted small mt-1">Preview of uploaded image</p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="drawingResults" class="mt-4" style="display: none;">
+                        <h6>Analysis Results:</h6>
+                        <div id="drawingAnalysis" class="border p-3 rounded bg-light"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="analyzeDrawing()">Analyze Drawing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Generation Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generate Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="imageForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Craft Type</label>
+                                <select class="form-select" id="imageCraftType" required>
+                                    <option value="">Select Craft</option>
+                                    <option value="Madhubani Painting">Madhubani Painting</option>
+                                    <option value="Bamboo Weaving">Bamboo Weaving</option>
+                                    <option value="Block Printing">Block Printing</option>
+                                    <option value="Pottery">Pottery</option>
+                                    <option value="Textile Weaving">Textile Weaving</option>
+                                    <option value="Wood Carving">Wood Carving</option>
+                                    <option value="Metal Work">Metal Work</option>
+                                    <option value="Jewelry Making">Jewelry Making</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Style</label>
+                                <select class="form-select" id="imageStyle">
+                                    <option value="realistic">Realistic</option>
+                                    <option value="artistic">Artistic</option>
+                                    <option value="traditional">Traditional</option>
+                                    <option value="modern">Modern</option>
+                                    <option value="sketch">Sketch</option>
+                                    <option value="watercolor">Watercolor</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Describe the image you want to generate</label>
+                                <textarea class="form-control" id="imagePrompt" rows="4" 
+                                    placeholder="Describe the image you want to generate. Be specific about colors, patterns, materials, and style..."></textarea>
+                                <div class="form-text">Be as detailed as possible for better results. Include colors, patterns, materials, and style preferences.</div>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="imageResults" class="mt-4" style="display: none;">
+                        <h6>Generated Description:</h6>
+                        <div id="imageDescription" class="border p-3 rounded bg-light mb-3"></div>
+                        
+                        <h6>Enhanced Prompt for Image Generation:</h6>
+                        <div id="enhancedPrompt" class="border p-3 rounded bg-light mb-3"></div>
+                        
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>How to Use This Description:</h6>
+                            <p class="mb-2">Copy the enhanced prompt below and use it with these image generation services:</p>
+                            <ul class="mb-0">
+                                <li><strong>DALL-E 3 (OpenAI):</strong> Paste the prompt directly</li>
+                                <li><strong>Midjourney:</strong> Use /imagine with the prompt</li>
+                                <li><strong>Stable Diffusion:</strong> Use the prompt in your preferred interface</li>
+                                <li><strong>Adobe Firefly:</strong> Paste the prompt in the text-to-image tool</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="generateImage()">Generate Description</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Scripts -->
+        <!-- Sign Up Modal -->
+        <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="signupForm">
+                                            <div class="mb-3">
+                                                <label for="signupName" class="form-label">Name</label>
+                                                <input type="text" class="form-control" id="signupName" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="signupEmail" class="form-label">Email address</label>
+                                                <input type="email" class="form-control" id="signupEmail" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="signupPassword" class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="signupPassword" required>
+                                            </div>
+                                            <div id="signupMsg" class="text-danger mb-2"></div>
+                                            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sign In Modal -->
+        <div class="modal fade" id="signinModal" tabindex="-1" aria-labelledby="signinModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="signinModalLabel">Sign In</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="signinForm">
+                            <div class="mb-3">
+                                <label for="signinEmail" class="form-label">Email address</label>
+                                <input type="email" class="form-control" id="signinEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="signinPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="signinPassword" required>
+                            </div>
+                            <div id="signinMsg" class="text-danger mb-2"></div>
+                            <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced User Profile Modal -->
+        <!-- Add ONLY this simple modal to your index.html for viewing OTHER users -->
+
+<!-- User Profile View Modal (Read-Only) -->
+<div class="modal fade" id="userProfileViewModal" tabindex="-1" aria-labelledby="userProfileViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="userProfileViewModalLabel">
+                    <i class="fas fa-user me-2"></i><span id="viewUserName">User Profile</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Profile Info -->
+                <div class="row mb-4">
+                    <div class="col-md-3 text-center">
+                        <img id="viewUserPic" src="https://via.placeholder.com/120x120/32CD32/FFFFFF?text=U" 
+                             alt="Profile Picture" class="rounded-circle img-fluid" style="width: 120px; height: 120px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-9">
+                        <h3 id="viewUserNameText">Loading...</h3>
+                        <p id="viewUserEmail" class="text-muted">Loading...</p>
+                        <p id="viewUserBio" class="mb-3">Loading...</p>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <strong id="viewUserPosts" class="d-block">0</strong>
+                                <small class="text-muted">Posts</small>
+                            </div>
+                            <div class="col-4">
+                                <strong id="viewUserFollowers" class="d-block">0</strong>
+                                <small class="text-muted">Followers</small>
+                            </div>
+                            <div class="col-4">
+                                <strong id="viewUserFollowing" class="d-block">0</strong>
+                                <small class="text-muted">Following</small>
+                            </div>
+                        </div>
+                        
+                        <button id="followToggleBtn" class="btn btn-success" 
+                                data-action="follow" data-target-email="">
+                            <i class="fas fa-user-plus me-1"></i>Follow
+                        </button>
+                        <a id="contactUserBtn" class="btn btn-outline-success ms-2" href="chat.html" rel="noopener">
+                            <i class="fas fa-comments me-1"></i>Contact
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Posts Section -->
+                <hr>
+                <h5><i class="fas fa-images me-2"></i>Posts</h5>
+                <div id="viewUserPostsContainer">
+                    <div class="text-center py-4" id="viewPostsLoading">
+                        <i class="fas fa-spinner fa-spin fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Loading posts...</p>
+                    </div>
+                    <div class="row" id="viewPostsGrid" style="display: none;">
+                        <!-- Posts will be loaded here -->
+                    </div>
+                    <div class="text-center py-4" id="viewNoPosts" style="display: none;">
+                        <i class="fas fa-images fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">No posts yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Ensure initMap is available globally
+            window.initMap = initMap;
+            // Set Contact button link in user profile modal
+            document.addEventListener('DOMContentLoaded', function() {
+                const contactBtn = document.getElementById('contactUserBtn');
+                const emailSpan = document.getElementById('viewUserEmail');
+                if (contactBtn && emailSpan) {
+                    // Always start hidden/disabled
+                    contactBtn.style.display = 'none';
+                    contactBtn.href = '#';
+                    contactBtn.removeAttribute('data-chat-email');
+                    // Update contact button link every time modal is shown
+                    const modal = document.getElementById('userProfileViewModal');
+                    modal.addEventListener('show.bs.modal', function() {
+                        setTimeout(function() {
+                            // Always get the latest email from the modal content
+                            let email = emailSpan.dataset.email || emailSpan.textContent.trim();
+                            // Fallback: try to get email from the follow button if not found
+                            if ((!email || !email.includes('@')) && document.getElementById('followToggleBtn')) {
+                                email = document.getElementById('followToggleBtn').getAttribute('data-target-email') || '';
+                            }
+                            // Debug log
+                            console.log('Contact button email:', email);
+                            if (email && email.includes('@')) {
+                                contactBtn.href = `/chat.html?user=${encodeURIComponent(email)}`;
+                                contactBtn.target = '_blank';
+                                contactBtn.rel = 'noopener';
+                                contactBtn.style.display = '';
+                                contactBtn.setAttribute('data-chat-email', email);
+                                contactBtn.classList.remove('disabled');
+                            } else {
+                                contactBtn.href = '#';
+                                contactBtn.style.display = 'none';
+                                contactBtn.removeAttribute('data-chat-email');
+                                contactBtn.classList.add('disabled');
+                            }
+                        }, 120); // Wait for modal content to update
+                    });
+                    // Prevent default navigation if email is not valid
+                    contactBtn.addEventListener('click', function(e) {
+                        const email = contactBtn.getAttribute('data-chat-email');
+                        if (!email || !email.includes('@')) {
+                            e.preventDefault();
+                            return false;
+                        }
+                        // Let browser open the link in a new tab if valid
+                    });
+                }
+            });
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ maps_api_key or 'YOUR_GOOGLE_MAPS_API_KEY' }}&callback=initMap" async defer></script>
+        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

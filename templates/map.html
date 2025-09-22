@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan Map - Karigar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .map-page-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .map-container {
+            border-radius: 20px;
+            overflow: visible;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            height: 700px;
+            width: 100%;
+            position: relative;
+            border: 3px solid rgba(50,205,50,0.3);
+            margin: 20px 0;
+        }
+        
+        #map {
+            border-radius: 17px;
+            width: 100% !important;
+            height: 100% !important;
+            position: relative !important;
+            z-index: 1 !important;
+            display: block !important;
+        }
+        
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .map-control-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .map-control-btn:hover {
+            background: rgba(50, 205, 50, 0.9);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            z-index: 10;
+            min-width: 250px;
+        }
+        
+        .legend-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .legend-text {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .info-window {
+            max-width: 450px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .info-window h4 {
+            color: #32CD32;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #32CD32;
+            padding-bottom: 5px;
+        }
+        
+        .info-window p {
+            margin-bottom: 8px;
+            color: #666;
+        }
+        
+        .info-window .rating {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .gm-style .gm-style-iw-c {
+            padding: 0 !important;
+            border-radius: 15px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+        }
+        
+        .gm-style .gm-style-iw-d {
+            overflow: hidden !important;
+            border-radius: 15px !important;
+        }
+        
+        .gm-style .gm-style-iw-tc {
+            display: none !important;
+        }
+        
+        /* Simple marker styling */
+        .gm-style .gm-style-iw-c {
+            padding: 0 !important;
+            border-radius: 15px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+        }
+        
+        .gm-style .gm-style-iw-d {
+            overflow: hidden !important;
+            border-radius: 15px !important;
+        }
+        
+        .gm-style .gm-style-iw-tc {
+            display: none !important;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            background: rgba(50, 205, 50, 0.9);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            text-decoration: none;
+        }
+        
+        /* Side Panels */
+        .side-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            height: 700px;
+            margin: 20px 0;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(50,205,50,0.2);
+        }
+        
+        .panel-header {
+            background: linear-gradient(135deg, #32CD32, #228B22);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .panel-header h4 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        .panel-content {
+            padding: 20px;
+            height: calc(100% - 80px);
+            overflow-y: auto;
+        }
+        
+        .no-selection {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .location-details {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .location-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .location-title {
+            color: #32CD32;
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #32CD32;
+            padding-bottom: 8px;
+        }
+        
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        
+        .detail-section h6 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .detail-section p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .specialties {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .specialty-tag {
+            background: rgba(50, 205, 50, 0.1);
+            color: #32CD32;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(50, 205, 50, 0.3);
+        }
+        
+        .rating {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Location Type Cards */
+        .location-type-card {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .location-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .type-header {
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .type-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .type-content {
+            padding: 15px;
+            background: white;
+        }
+        
+        .type-content p {
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Cultural Sections */
+        .cultural-section {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #32CD32;
+        }
+        
+        .cultural-section h5 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .cultural-section p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        
+        .cultural-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .cultural-section li {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #32CD32;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 15px;
+            padding-left: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #32CD32;
+        }
+        
+        .timeline-item strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Map Page Header -->
+    <div class="map-page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-12 text-center">
+                    <h1 class="display-4 fw-bold mb-2">
+                        <i class="fas fa-map-marked-alt me-3" style="color: #32CD32;"></i>
+                        Artisan Discovery Map
+                    </h1>
+                    <p class="lead mb-0">Explore famous marketplaces and artisan locations across India</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Side Panel -->
+            <div class="col-lg-3">
+                <div class="side-panel left-panel">
+                    <div class="panel-header">
+                        <h4><i class="fas fa-map-marker-alt me-2"></i>Location Details</h4>
+                    </div>
+                    <div class="panel-content" id="leftPanelContent">
+                        <div class="location-types-overview">
+                            <h4 class="text-center mb-4" style="color: #32CD32;">Location Types Overview</h4>
+                            
+                            <!-- Famous Marketplaces -->
+                            <div class="location-type-card mb-4">
+                                <div class="type-header" style="background: #e74c3c;">
+                                    <i class="fas fa-store"></i>
+                                    <h5>Famous Marketplaces</h5>
+                                </div>
+                                <div class="type-content">
+                                    <p><strong>Count:</strong> 5 locations</p>
+                                    <p><strong>Description:</strong> Historic marketplaces famous for traditional crafts, textiles, jewelry, and cultural artifacts.</p>
+                                    <div class="specialties">
+                                        <span class="specialty-tag">Textiles</span>
+                                        <span class="specialty-tag">Jewelry</span>
+                                        <span class="specialty-tag">Spices</span>
+                                        <span class="specialty-tag">Antiques</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Artisan Workshops -->
+                            <div class="location-type-card mb-4">
+                                <div class="type-header" style="background: #3498db;">
+                                    <i class="fas fa-palette"></i>
+                                    <h5>Artisan Workshops</h5>
+                                </div>
+                                <div class="type-content">
+                                    <p><strong>Count:</strong> 6 locations</p>
+                                    <p><strong>Description:</strong> Traditional craft centers where skilled artisans create authentic handmade products.</p>
+                                    <div class="specialties">
+                                        <span class="specialty-tag">Paintings</span>
+                                        <span class="specialty-tag">Embroidery</span>
+                                        <span class="specialty-tag">Woodwork</span>
+                                        <span class="specialty-tag">Weaving</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Craft Villages -->
+                            <div class="location-type-card mb-4">
+                                <div class="type-header" style="background: #f39c12;">
+                                    <i class="fas fa-home"></i>
+                                    <h5>Craft Villages</h5>
+                                </div>
+                                <div class="type-content">
+                                    <p><strong>Count:</strong> 2 locations</p>
+                                    <p><strong>Description:</strong> Heritage villages where entire communities practice traditional crafts passed down through generations.</p>
+                                    <div class="specialties">
+                                        <span class="specialty-tag">Pattachitra</span>
+                                        <span class="specialty-tag">Appliqué</span>
+                                        <span class="specialty-tag">Traditional Art</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Heritage Sites -->
+                            <div class="location-type-card mb-4">
+                                <div class="type-header" style="background: #9b59b6;">
+                                    <i class="fas fa-landmark"></i>
+                                    <h5>Heritage Sites</h5>
+                                </div>
+                                <div class="type-content">
+                                    <p><strong>Count:</strong> 1 location</p>
+                                    <p><strong>Description:</strong> UNESCO World Heritage sites with traditional craft workshops and historical significance.</p>
+                                    <div class="specialties">
+                                        <span class="specialty-tag">UNESCO Heritage</span>
+                                        <span class="specialty-tag">Mughal Architecture</span>
+                                        <span class="specialty-tag">Traditional Crafts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Center Map Area -->
+            <div class="col-lg-6">
+                <!-- Back Button -->
+                <a href="/" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+                
+                <!-- Map Container -->
+                <div class="map-container">
+                    <div id="map"></div>
+                    
+                    <!-- Map Controls -->
+                    <div class="map-controls">
+                        <button class="map-control-btn" onclick="toggleMarketplaces()">
+                            <i class="fas fa-store"></i>
+                            <span id="marketplace-text">Hide Marketplaces</span>
+                        </button>
+                        <button class="map-control-btn" onclick="toggleArtisans()">
+                            <i class="fas fa-palette"></i>
+                            <span id="artisan-text">Hide Artisans</span>
+                        </button>
+                        <button class="map-control-btn" onclick="resetMapView()">
+                            <i class="fas fa-home"></i>
+                            Reset View
+                        </button>
+                    </div>
+                    
+                    <!-- Map Legend -->
+                    <div class="map-legend">
+                        <div class="legend-title">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Location Types
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e74c3c;"></div>
+                            <span class="legend-text">Famous Marketplaces</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #3498db;"></div>
+                            <span class="legend-text">Artisan Workshops</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f39c12;"></div>
+                            <span class="legend-text">Craft Villages</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #9b59b6;"></div>
+                            <span class="legend-text">Heritage Sites</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side Panel -->
+            <div class="col-lg-3">
+                <div class="side-panel right-panel">
+                    <div class="panel-header">
+                        <h4><i class="fas fa-history me-2"></i>History & Culture</h4>
+                    </div>
+                    <div class="panel-content" id="rightPanelContent">
+                        <div class="cultural-overview">
+                            <h4 class="text-center mb-4" style="color: #32CD32;">Cultural Heritage Overview</h4>
+                            
+                            <!-- Cultural Significance -->
+                            <div class="cultural-section mb-4">
+                                <h5 style="color: #32CD32; border-bottom: 2px solid #32CD32; padding-bottom: 5px;">
+                                    <i class="fas fa-globe-asia"></i> Cultural Significance
+                                </h5>
+                                <p>India's craft heritage spans over 5,000 years, representing one of the world's richest cultural traditions. These locations showcase the diversity of Indian craftsmanship, from ancient techniques passed down through generations to modern interpretations of traditional arts.</p>
+                            </div>
+                            
+                            <!-- Historical Timeline -->
+                            <div class="cultural-section mb-4">
+                                <h5 style="color: #32CD32; border-bottom: 2px solid #32CD32; padding-bottom: 5px;">
+                                    <i class="fas fa-clock"></i> Historical Timeline
+                                </h5>
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <strong>3000+ BCE:</strong> Indus Valley Civilization crafts
+                                    </div>
+                                    <div class="timeline-item">
+                                        <strong>500 BCE:</strong> Buddhist art and architecture
+                                    </div>
+                                    <div class="timeline-item">
+                                        <strong>320-550 CE:</strong> Gupta period golden age
+                                    </div>
+                                    <div class="timeline-item">
+                                        <strong>1200-1700 CE:</strong> Mughal era refinement
+                                    </div>
+                                    <div class="timeline-item">
+                                        <strong>1700-1947 CE:</strong> Colonial period adaptation
+                                    </div>
+                                    <div class="timeline-item">
+                                        <strong>1947-Present:</strong> Modern revival and preservation
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Regional Diversity -->
+                            <div class="cultural-section mb-4">
+                                <h5 style="color: #32CD32; border-bottom: 2px solid #32CD32; padding-bottom: 5px;">
+                                    <i class="fas fa-map"></i> Regional Diversity
+                                </h5>
+                                <p><strong>North India:</strong> Mughal-inspired crafts, Kashmiri shawls, brass work</p>
+                                <p><strong>South India:</strong> Silk weaving, temple crafts, wood carving</p>
+                                <p><strong>East India:</strong> Pattachitra paintings, Kantha embroidery</p>
+                                <p><strong>West India:</strong> Kutch embroidery, mirror work, textiles</p>
+                            </div>
+                            
+                            <!-- UNESCO Recognition -->
+                            <div class="cultural-section mb-4">
+                                <h5 style="color: #32CD32; border-bottom: 2px solid #32CD32; padding-bottom: 5px;">
+                                    <i class="fas fa-award"></i> UNESCO Recognition
+                                </h5>
+                                <p>Several Indian craft traditions have been recognized by UNESCO as Intangible Cultural Heritage, including:</p>
+                                <ul>
+                                    <li>Kumbh Mela (2017)</li>
+                                    <li>Yoga (2016)</li>
+                                    <li>Traditional brass and copper craft (2014)</li>
+                                    <li>Kutiyattam Sanskrit theatre (2008)</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Economic Impact -->
+                            <div class="cultural-section mb-4">
+                                <h5 style="color: #32CD32; border-bottom: 2px solid #32CD32; padding-bottom: 5px;">
+                                    <i class="fas fa-rupee-sign"></i> Economic Impact
+                                </h5>
+                                <p>India's handicraft sector employs over 7 million artisans and contributes significantly to the economy, with exports worth billions of dollars annually.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let map;
+        let marketplaceMarkers = [];
+        let artisanMarkers = [];
+        let showMarketplaces = true;
+        let showArtisans = true;
+
+        // Famous marketplaces and artisan locations data
+        const locations = {
+            marketplaces: [
+                {
+                    name: "Chandni Chowk, Delhi",
+                    lat: 28.6562,
+                    lng: 77.2310,
+                    type: "marketplace",
+                    description: "Historic marketplace famous for textiles, jewelry, and traditional crafts",
+                    rating: "4.5",
+                    specialties: ["Textiles", "Jewelry", "Spices", "Traditional Crafts"],
+                    history: "Established in 1650 by Mughal Emperor Shah Jahan, Chandni Chowk is one of the oldest and busiest markets in Old Delhi. The name 'Chandni Chowk' means 'moonlight square' and was designed as a canal with moonlight reflecting in it. This UNESCO World Heritage site has been the commercial heart of Delhi for over 370 years.",
+                    culturalSignificance: "A symbol of Delhi's rich Mughal heritage, this market represents the fusion of Persian, Mughal, and Indian architectural styles. It's where traditional Indian craftsmanship meets modern commerce.",
+                    bestTimeToVisit: "October to March (winter months)",
+                    famousFor: "Paratha Wali Gali, Kinari Bazaar, Dariba Kalan (silver market), and traditional wedding shopping",
+                    image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400"
+                },
+                {
+                    name: "Johari Bazaar, Jaipur",
+                    lat: 26.9124,
+                    lng: 75.7873,
+                    type: "marketplace",
+                    description: "Famous for precious stones, jewelry, and traditional Rajasthani crafts",
+                    rating: "4.7",
+                    specialties: ["Jewelry", "Precious Stones", "Rajasthani Crafts", "Textiles"],
+                    history: "Johari Bazaar, meaning 'Jeweler's Market', was established in the 18th century during the reign of Maharaja Sawai Jai Singh II. It was designed as part of Jaipur's planned city layout and has been the center of gemstone trade for over 250 years.",
+                    culturalSignificance: "This market is the heart of Rajasthan's jewelry industry and represents the royal heritage of Jaipur. It's where the famous 'Kundan' and 'Meenakari' techniques are still practiced by master craftsmen.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Kundan jewelry, Meenakari work, precious stones, and traditional Rajasthani jewelry",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                },
+                {
+                    name: "Chor Bazaar, Mumbai",
+                    lat: 19.0760,
+                    lng: 72.8777,
+                    type: "marketplace",
+                    description: "Antique market known for vintage items and traditional artifacts",
+                    rating: "4.2",
+                    specialties: ["Antiques", "Vintage Items", "Traditional Artifacts"],
+                    history: "Chor Bazaar, literally meaning 'Thieves Market', was established in the 19th century during British colonial rule. Despite its name, it's a legitimate market that got its name from the British who thought the goods were stolen. It's been Mumbai's treasure trove of antiques for over 150 years.",
+                    culturalSignificance: "This market represents Mumbai's colonial past and is a melting pot of cultures. It's where you can find artifacts from the British Raj, Portuguese colonial period, and traditional Indian crafts.",
+                    bestTimeToVisit: "November to February",
+                    famousFor: "Vintage furniture, antique clocks, colonial artifacts, and traditional Indian handicrafts",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                },
+                {
+                    name: "New Market, Kolkata",
+                    lat: 22.5726,
+                    lng: 88.3639,
+                    type: "marketplace",
+                    description: "Historic market for traditional Bengali crafts and textiles",
+                    rating: "4.3",
+                    specialties: ["Bengali Crafts", "Textiles", "Traditional Items"],
+                    history: "Established in 1874 by the British, New Market (originally called Sir Stuart Hogg Market) was built to serve the European community in Kolkata. It's one of the oldest markets in India and has been a commercial hub for over 150 years.",
+                    culturalSignificance: "This market represents Kolkata's colonial heritage and Bengali culture. It's where traditional Bengali crafts like 'Kantha' embroidery and 'Tant' sarees are still sold alongside colonial architecture.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Kantha embroidery, Tant sarees, Bengali sweets, and colonial architecture",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                },
+                {
+                    name: "Commercial Street, Bangalore",
+                    lat: 12.9716,
+                    lng: 77.5946,
+                    type: "marketplace",
+                    description: "Popular shopping destination for traditional South Indian crafts",
+                    rating: "4.4",
+                    specialties: ["South Indian Crafts", "Textiles", "Traditional Items"],
+                    history: "Commercial Street was established in the early 20th century and became famous during the British colonial period. It's been Bangalore's premier shopping destination for over 100 years, evolving from a traditional market to a modern commercial hub.",
+                    culturalSignificance: "This street represents the blend of traditional South Indian culture with modern urban development. It's where traditional crafts from Karnataka, Tamil Nadu, and Kerala are showcased.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Mysore silk sarees, sandalwood products, traditional South Indian jewelry, and handicrafts",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                }
+            ],
+            artisans: [
+                {
+                    name: "Madhubani Art Village, Bihar",
+                    lat: 26.1200,
+                    lng: 85.3647,
+                    type: "artisan",
+                    description: "Home of traditional Madhubani painting artists",
+                    rating: "4.8",
+                    specialties: ["Madhubani Paintings", "Traditional Art"],
+                    history: "Madhubani painting, also known as Mithila art, originated in the Mithila region of Bihar over 2,500 years ago. According to legend, King Janaka commissioned these paintings for his daughter Sita's wedding to Lord Rama. The art form was traditionally practiced by women on the walls of their homes during festivals and special occasions.",
+                    culturalSignificance: "This art form represents the rich cultural heritage of Bihar and is deeply connected to Hindu mythology and local traditions. It's recognized as a Geographical Indication (GI) and has been passed down through generations of women artists.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Traditional Madhubani paintings, mythological themes, natural dyes, and women-led art workshops",
+                    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
+                },
+                {
+                    name: "Kutch Embroidery Center, Gujarat",
+                    lat: 23.7330,
+                    lng: 69.8597,
+                    type: "artisan",
+                    description: "Famous for intricate Kutch embroidery and mirror work",
+                    rating: "4.6",
+                    specialties: ["Kutch Embroidery", "Mirror Work", "Textiles"],
+                    history: "Kutch embroidery has a history spanning over 1,000 years and is deeply rooted in the cultural traditions of the Kutch region. The art form was traditionally practiced by the Rabari, Ahir, and Jat communities, with each community developing its own distinct style and motifs.",
+                    culturalSignificance: "This embroidery represents the vibrant culture of Gujarat and is known for its intricate mirror work (shisha) and colorful thread work. It's a symbol of the region's nomadic heritage and has gained international recognition for its beauty and craftsmanship.",
+                    bestTimeToVisit: "November to February",
+                    famousFor: "Intricate mirror work, colorful embroidery, traditional motifs, and women's empowerment through craft",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                },
+                {
+                    name: "Channapatna Toy Village, Karnataka",
+                    lat: 12.6528,
+                    lng: 77.2067,
+                    type: "artisan",
+                    description: "Traditional wooden toy making village",
+                    rating: "4.5",
+                    specialties: ["Wooden Toys", "Traditional Crafts"],
+                    history: "Channapatna toys have a history of over 200 years and were introduced by Tipu Sultan, who invited Persian artisans to teach the local craftsmen. The art form uses the traditional lacquerware technique and has been passed down through generations of skilled artisans.",
+                    culturalSignificance: "This craft represents Karnataka's rich heritage and is known for its eco-friendly approach using natural dyes and lacquer. The toys are safe for children and have gained recognition as a Geographical Indication (GI) product.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Eco-friendly wooden toys, lacquerware, traditional craftsmanship, and child-safe products",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                },
+                {
+                    name: "Pochampally Weaving Center, Telangana",
+                    lat: 17.3850,
+                    lng: 78.4867,
+                    type: "artisan",
+                    description: "Famous for Ikat weaving and traditional textiles",
+                    rating: "4.7",
+                    specialties: ["Ikat Weaving", "Traditional Textiles"],
+                    history: "Pochampally Ikat has a history of over 500 years and is known for its unique tie-and-dye technique. The art form was traditionally practiced by the Padmashali community and has been recognized as a Geographical Indication (GI) product. The intricate patterns are created by tying and dyeing the yarn before weaving.",
+                    culturalSignificance: "This weaving technique represents the rich textile heritage of Telangana and is known for its geometric patterns and vibrant colors. The art form has gained international recognition and is considered one of the finest examples of Indian textile craftsmanship.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Ikat sarees, geometric patterns, tie-and-dye technique, and traditional weaving methods",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                },
+                {
+                    name: "Moradabad Brass Center, Uttar Pradesh",
+                    lat: 28.8384,
+                    lng: 78.7733,
+                    type: "artisan",
+                    description: "World-famous brass and metal craft center",
+                    rating: "4.4",
+                    specialties: ["Brass Crafts", "Metal Work", "Traditional Items"],
+                    history: "Moradabad has been the center of brass and metal craft for over 400 years. The city was founded by Rustam Khan in 1625 and became famous for its brassware during the Mughal period. The craft was further developed during the British colonial era when it gained international recognition.",
+                    culturalSignificance: "This craft represents the rich metalworking heritage of Uttar Pradesh and is known for its intricate engravings and traditional techniques. Moradabad is often called the 'Brass City of India' and exports its products worldwide.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Brass utensils, decorative items, traditional engravings, and metal craft techniques",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                },
+                {
+                    name: "Kashmir Shawl Center, Jammu & Kashmir",
+                    lat: 34.0837,
+                    lng: 74.7973,
+                    type: "artisan",
+                    description: "Traditional Kashmiri shawl and carpet weaving",
+                    rating: "4.9",
+                    specialties: ["Kashmiri Shawls", "Carpets", "Traditional Textiles"],
+                    history: "Kashmiri shawls have a history of over 2,000 years and were mentioned in ancient texts. The art form reached its peak during the Mughal period when emperors like Akbar patronized the craft. The famous Pashmina shawls are made from the fine wool of the Changthangi goat found in the high altitudes of Ladakh.",
+                    culturalSignificance: "Kashmiri shawls represent the pinnacle of Indian textile craftsmanship and are known for their intricate embroidery, fine quality, and traditional motifs. The craft has been recognized as a Geographical Indication (GI) and is considered a symbol of luxury and elegance.",
+                    bestTimeToVisit: "May to September",
+                    famousFor: "Pashmina shawls, intricate embroidery, traditional motifs, and luxury textiles",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                }
+            ],
+            craftVillages: [
+                {
+                    name: "Raghurajpur, Odisha",
+                    lat: 20.2961,
+                    lng: 85.8245,
+                    type: "craftVillage",
+                    description: "Heritage craft village famous for Pattachitra paintings",
+                    rating: "4.6",
+                    specialties: ["Pattachitra Paintings", "Traditional Art"],
+                    history: "Raghurajpur has been a center of Pattachitra painting for over 1,000 years. The village is home to over 100 families of traditional artists who have been practicing this ancient art form for generations. The art form is deeply connected to the Jagannath Temple in Puri and depicts scenes from Hindu mythology.",
+                    culturalSignificance: "This village represents the living heritage of Odisha and is known for its traditional Pattachitra paintings on palm leaves and cloth. The art form has been recognized as a Geographical Indication (GI) and is considered one of the finest examples of Indian traditional art.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Pattachitra paintings, palm leaf art, traditional motifs, and heritage village experience",
+                    image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
+                },
+                {
+                    name: "Pipli, Odisha",
+                    lat: 20.1139,
+                    lng: 85.8317,
+                    type: "craftVillage",
+                    description: "Famous for colorful appliqué work and traditional crafts",
+                    rating: "4.3",
+                    specialties: ["Appliqué Work", "Traditional Crafts"],
+                    history: "Pipli has been the center of appliqué work for over 500 years and is closely associated with the Jagannath Temple in Puri. The craft was traditionally used to make canopies, umbrellas, and decorative items for the temple. The art form has evolved over the centuries and now includes a wide range of products.",
+                    culturalSignificance: "This craft represents the rich textile heritage of Odisha and is known for its vibrant colors and intricate designs. The appliqué work is deeply connected to the religious and cultural traditions of the region and has gained recognition as a Geographical Indication (GI) product.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Colorful appliqué work, traditional designs, religious motifs, and textile crafts",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                }
+            ],
+            heritageSites: [
+                {
+                    name: "Fatehpur Sikri Craft Center, Uttar Pradesh",
+                    lat: 27.0945,
+                    lng: 77.6679,
+                    type: "heritageSite",
+                    description: "UNESCO World Heritage site with traditional craft workshops",
+                    rating: "4.8",
+                    specialties: ["Traditional Crafts", "Heritage Art"],
+                    history: "Fatehpur Sikri was built by Mughal Emperor Akbar in 1571 and served as the capital of the Mughal Empire for 14 years. The city is a masterpiece of Mughal architecture and is now a UNESCO World Heritage site. The craft center preserves traditional Mughal-era crafts and techniques.",
+                    culturalSignificance: "This site represents the pinnacle of Mughal architecture and craftsmanship. The craft center showcases traditional techniques that were used during the Mughal period and provides a living connection to India's rich cultural heritage.",
+                    bestTimeToVisit: "October to March",
+                    famousFor: "Mughal architecture, traditional crafts, UNESCO heritage site, and historical significance",
+                    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+                }
+            ]
+        };
+
+        function initMap() {
+            const mapElement = document.getElementById('map');
+            if (!mapElement) {
+                console.error('Map element not found!');
+                return;
+            }
+
+            // Center on India
+            const center = { lat: 20.5937, lng: 78.9629 };
+            
+            map = new google.maps.Map(mapElement, {
+                zoom: 5,
+                center: center,
+                clickableIcons: true,
+                gestureHandling: 'auto',
+                disableDefaultUI: false,
+                zoomControl: true,
+                mapTypeControl: false,
+                scaleControl: true,
+                streetViewControl: false,
+                rotateControl: false,
+                fullscreenControl: false,
+                draggable: true,
+                scrollwheel: true,
+                styles: [
+                    {
+                        featureType: 'poi',
+                        elementType: 'labels',
+                        stylers: [{ visibility: 'off' }]
+                    },
+                    {
+                        featureType: 'water',
+                        elementType: 'geometry',
+                        stylers: [{ color: '#4A90E2' }]
+                    },
+                    {
+                        featureType: 'landscape',
+                        elementType: 'geometry',
+                        stylers: [{ color: '#f5f5f5' }]
+                    }
+                ]
+            });
+
+            // Add all markers
+            addAllMarkers();
+            
+            // Simple map click handler
+            map.addListener('click', function(event) {
+                console.log('Map clicked at:', event.latLng);
+            });
+            
+            console.log('Map initialized successfully');
+        }
+
+        function addAllMarkers() {
+            // Add marketplace markers
+            locations.marketplaces.forEach(location => {
+                addMarker(location, 'marketplace');
+            });
+
+            // Add artisan markers
+            locations.artisans.forEach(location => {
+                addMarker(location, 'artisan');
+            });
+
+            // Add craft village markers
+            locations.craftVillages.forEach(location => {
+                addMarker(location, 'craftVillage');
+            });
+
+            // Add heritage site markers
+            locations.heritageSites.forEach(location => {
+                addMarker(location, 'heritageSite');
+            });
+        }
+
+        function addMarker(location, category) {
+            let iconColor;
+            let iconSymbol;
+            
+            switch(category) {
+                case 'marketplace':
+                    iconColor = '#e74c3c';
+                    iconSymbol = '🏪';
+                    break;
+                case 'artisan':
+                    iconColor = '#3498db';
+                    iconSymbol = '🎨';
+                    break;
+                case 'craftVillage':
+                    iconColor = '#f39c12';
+                    iconSymbol = '🏘️';
+                    break;
+                case 'heritageSite':
+                    iconColor = '#9b59b6';
+                    iconSymbol = '🏛️';
+                    break;
+            }
+
+            // Create a simple marker with default icon first
+            const marker = new google.maps.Marker({
+                position: { lat: location.lat, lng: location.lng },
+                map: map,
+                title: location.name,
+                clickable: true,
+                animation: google.maps.Animation.DROP
+            });
+            
+            // Set custom icon after marker is created
+            marker.setIcon({
+                url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                    <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="15" cy="15" r="12" fill="${iconColor}" stroke="white" stroke-width="3"/>
+                        <circle cx="15" cy="15" r="6" fill="white" opacity="0.8"/>
+                    </svg>
+                `)}`,
+                scaledSize: new google.maps.Size(30, 30),
+                anchor: new google.maps.Point(15, 15)
+            });
+
+            // No info window needed - we'll use side panels
+
+            // Click handler to show details in side panels
+            marker.addListener('click', function() {
+                console.log('Marker clicked:', location.name);
+                showLocationDetails(location, category, iconColor);
+            });
+            
+            // Simple hover effect
+            marker.addListener('mouseover', function() {
+                console.log('Marker hovered:', location.name);
+                marker.setIcon({
+                    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                        <svg width="35" height="35" viewBox="0 0 35 35" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="17.5" cy="17.5" r="15" fill="${iconColor}" stroke="white" stroke-width="4"/>
+                            <circle cx="17.5" cy="17.5" r="8" fill="white" opacity="0.9"/>
+                        </svg>
+                    `)}`,
+                    scaledSize: new google.maps.Size(35, 35),
+                    anchor: new google.maps.Point(17.5, 17.5)
+                });
+            });
+            
+            marker.addListener('mouseout', function() {
+                marker.setIcon({
+                    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                        <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="15" cy="15" r="12" fill="${iconColor}" stroke="white" stroke-width="3"/>
+                            <circle cx="15" cy="15" r="6" fill="white" opacity="0.8"/>
+                        </svg>
+                    `)}`,
+                    scaledSize: new google.maps.Size(30, 30),
+                    anchor: new google.maps.Point(15, 15)
+                });
+            });
+
+            // Store markers for toggle functionality
+            if (category === 'marketplace') {
+                marketplaceMarkers.push(marker);
+            } else {
+                artisanMarkers.push(marker);
+            }
+        }
+
+        function toggleMarketplaces() {
+            showMarketplaces = !showMarketplaces;
+            const text = document.getElementById('marketplace-text');
+            
+            marketplaceMarkers.forEach(marker => {
+                marker.setVisible(showMarketplaces);
+            });
+            
+            text.textContent = showMarketplaces ? 'Hide Marketplaces' : 'Show Marketplaces';
+        }
+
+        function toggleArtisans() {
+            showArtisans = !showArtisans;
+            const text = document.getElementById('artisan-text');
+            
+            artisanMarkers.forEach(marker => {
+                marker.setVisible(showArtisans);
+            });
+            
+            text.textContent = showArtisans ? 'Hide Artisans' : 'Show Artisans';
+        }
+
+        function resetMapView() {
+            map.setCenter({ lat: 20.5937, lng: 78.9629 });
+            map.setZoom(5);
+        }
+        
+        function showLocationDetails(location, category, iconColor) {
+            // Left panel content (Location Details)
+            const leftPanelContent = `
+                <div class="location-details">
+                    <img src="${location.image}" alt="${location.name}" class="location-image">
+                    <h3 class="location-title">${location.name}</h3>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-tag"></i>Type</h6>
+                        <span style="background: ${iconColor}; color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.9rem;">
+                            ${category.charAt(0).toUpperCase() + category.slice(1)}
+                        </span>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-star"></i>Rating</h6>
+                        <p><span class="rating">${location.rating} ⭐</span></p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-info-circle"></i>Description</h6>
+                        <p>${location.description}</p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-shopping-bag"></i>Specialties</h6>
+                        <div class="specialties">
+                            ${location.specialties.map(specialty => 
+                                `<span class="specialty-tag">${specialty}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-calendar"></i>Best Time to Visit</h6>
+                        <p>${location.bestTimeToVisit}</p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-star"></i>Famous For</h6>
+                        <p>${location.famousFor}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Right panel content (History & Culture)
+            const rightPanelContent = `
+                <div class="location-details">
+                    <h3 class="location-title">${location.name}</h3>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-landmark"></i>Historical Background</h6>
+                        <p>${location.history}</p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-palette"></i>Cultural Significance</h6>
+                        <p>${location.culturalSignificance}</p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h6><i class="fas fa-map-marker-alt"></i>Location</h6>
+                        <p><strong>Coordinates:</strong> ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}</p>
+                        <p><strong>Region:</strong> ${getRegionName(location.lat, location.lng)}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Update the panels
+            document.getElementById('leftPanelContent').innerHTML = leftPanelContent;
+            document.getElementById('rightPanelContent').innerHTML = rightPanelContent;
+        }
+        
+        function getRegionName(lat, lng) {
+            if (lat >= 20 && lat <= 30 && lng >= 70 && lng <= 90) return "Northern India";
+            if (lat >= 10 && lat <= 20 && lng >= 70 && lng <= 90) return "Southern India";
+            if (lat >= 20 && lat <= 30 && lng >= 85 && lng <= 95) return "Eastern India";
+            if (lat >= 20 && lat <= 30 && lng >= 70 && lng <= 80) return "Western India";
+            if (lat >= 25 && lat <= 35 && lng >= 70 && lng <= 80) return "Pakistan";
+            if (lat >= 20 && lat <= 30 && lng >= 90 && lng <= 95) return "Bangladesh";
+            if (lat >= 25 && lat <= 30 && lng >= 80 && lng <= 90) return "Nepal";
+            return "South Asia";
+        }
+
+        
+        // Initialize map when page loads
+        window.addEventListener('load', function() {
+            if (typeof google !== 'undefined' && google.maps) {
+                initMap();
+                console.log('Map loaded successfully');
+            } else {
+                console.error('Google Maps API not loaded');
+            }
+        });
+    </script>
+    
+    <script async defer 
+        src="https://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}&callback=initMap">
+    </script>
+</body>
+</html>

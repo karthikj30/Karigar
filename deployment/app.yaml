@@ -1,0 +1,15 @@
+runtime: python311
+
+env_variables:
+  GOOGLE_AI_API_KEY: "380141004300-l89ii0cd4njp8dlk3nsa6ob92onc22q7.apps.googleusercontent.com"
+  GOOGLE_MAPS_API_KEY: "AIzaSyDNIgXVWlsnIzC3DgUriFA0Kx4TuG7Fd-4"
+  GOOGLE_CLOUD_PROJECT: "karigar-472016"
+
+automatic_scaling:
+  min_instances: 1
+  max_instances: 10
+  target_cpu_utilization: 0.6
+
+handlers:
+- url: /.*
+  script: auto
